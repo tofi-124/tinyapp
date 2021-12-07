@@ -13,7 +13,7 @@ const urlDatabase = {
 };
 
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  res.redirect("/urls");
 });
 
 app.get("/urls", (req, res) => {
@@ -51,47 +51,11 @@ app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
-});
-
 function generateRandomString() {
-  let chx = [
-    "A",
-    "B",
-    "C",
-    "D",
-    "E",
-    "F",
-    "G",
-    "H",
-    "I",
-    "J",
-    "K",
-    "L",
-    "M",
-    "N",
-    "O",
-    "P",
-    "Q",
-    "R",
-    "S",
-    "T",
-    "U",
-    "V",
-    "W",
-    "X",
-    "Y",
-    "Z",
-  ];
-  let number = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+  let chx = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrtsuvwxyz01234567890";
   let str = "";
   for (let i = 0; i < 6; i++) {
-    if (i % 2 === 0) {
-      str += chx[Math.floor(Math.random() * 25)].toLowerCase();
-    } else {
-      str += number[Math.floor(Math.random() * 10)];
-    }
+    str += chx.charAt(Math.floor(Math.random() * chx.length));
   }
   return str;
 }
