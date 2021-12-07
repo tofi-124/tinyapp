@@ -26,8 +26,9 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  console.log(req.body); // Log the POST request body to the console
-  res.send("ok"); // Respond with 'Ok' (we will replace this)
+  urlDatabase[generateRandomString()] = req.body.longURL;
+  const templateVars = { urls: urlDatabase };
+  res.render("urls_index", templateVars);
 });
 
 app.get("/urls/:shortURL", (req, res) => {
@@ -36,6 +37,10 @@ app.get("/urls/:shortURL", (req, res) => {
     longURL: urlDatabase[req.params.shortURL],
   };
   res.render("urls_show", templateVars);
+});
+
+app.get("/u/:shortURL", (req, res) => {
+  res.redirect(urlDatabase[req.params.shortURL]);
 });
 
 app.listen(PORT, () => {
@@ -80,10 +85,10 @@ function generateRandomString() {
     "Z",
   ];
   let number = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-  let str;
+  let str = "";
   for (let i = 0; i < 6; i++) {
     if (i % 2 === 0) {
-      str += chx[Math.floor(Math.random() * 25)];
+      str += chx[Math.floor(Math.random() * 25)].toLowerCase();
     } else {
       str += number[Math.floor(Math.random() * 10)];
     }
