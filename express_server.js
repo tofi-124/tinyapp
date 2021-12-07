@@ -26,9 +26,13 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  urlDatabase[generateRandomString()] = req.body.longURL;
-  const templateVars = { urls: urlDatabase };
-  res.render("urls_index", templateVars);
+  if (req.body.longURL.length === 0) {
+    res.render("urls_404.ejs");
+  } else {
+    urlDatabase[generateRandomString()] = req.body.longURL;
+    const templateVars = { urls: urlDatabase };
+    res.render("urls_index", templateVars);
+  }
 });
 
 app.get("/urls/:shortURL", (req, res) => {
@@ -40,7 +44,7 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 
 app.post("/urls/:id", (req, res) => {
-  delete urlDatabase[req.params.id]
+  delete urlDatabase[req.params.id];
   urlDatabase[req.params.id] = req.body.newLongURL;
   res.redirect("/urls");
 });
