@@ -16,5 +16,8 @@
     "url": "https://github.com/tofi-124/tinyapp/issues"
   },
   "homepage": "https://github.com/tofi-124/tinyapp#readme",
-  "description": ""
+  "description": "",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
 }
