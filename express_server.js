@@ -14,9 +14,7 @@ const urlDatabase = {};
 const users = {};
 
 app.get("/", (req, res) => {
-  if (req.cookies["user_id"]) {
-    res.redirect("/urls");
-  } else res.redirect("/register");
+  res.redirect("/urls");
 });
 
 app.get("/register", (req, res) => {
@@ -31,15 +29,18 @@ app.post("/register", (req, res) => {
   let id = generateRandomString();
   let email = req.body.email;
   let password = req.body.password;
+  const templateVars = {};
 
   if (id.length === 0 || email.length === 0) {
     //This checks if the input is empty
+    templateVars.error = "Id or Email is empty";
     res.statusCode = 400;
-    res.render("urls_404.ejs");
+    res.render("urls_404.ejs", templateVars);
   } else if (emailFinder(users, email)) {
     //This checks if there is duplicate email
+    templateVars.error = "Email already exists!";
     res.statusCode = 400;
-    res.render("urls_404.ejs");
+    res.render("urls_404.ejs", templateVars);
   } else {
     //if everything is okay this here will create an object
     users[id] = {
@@ -82,12 +83,14 @@ app.post("/logout", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  const templateVars = {
-    urls: urlDatabase,
-    user: users[req.cookies["user_id"]],
-    user_id: req.cookies["user_id"],
-  };
-  res.render("urls_index", templateVars);
+  if (req.cookies["user_id"]) {
+    const templateVars = {
+      urls: urlDatabase,
+      user: users[req.cookies["user_id"]],
+      user_id: req.cookies["user_id"],
+    };
+    res.render("urls_index", templateVars);
+  } else res.render("urls_landingpage.ejs");
 });
 
 app.get("/urls/new", (req, res) => {
@@ -97,12 +100,14 @@ app.get("/urls/new", (req, res) => {
       user_id: req.cookies["user_id"],
     };
     res.render("urls_new", templateVars);
-  } else res.redirect("/login");
+  } else res.render("urls_landingpage.ejs");
 });
 
 app.post("/urls/new", (req, res) => {
   if (req.body.longURL.length === 0) {
-    res.render("urls_404.ejs"); //404 Undefined
+    const templateVars = {};
+    templateVars.error = "Please type in a valid link!";
+    res.render("urls_404.ejs", templateVars); //404 Undefined
   } else {
     urlDatabase[generateRandomString()] = {
       longURL: req.body.longURL,
@@ -120,7 +125,9 @@ app.post("/urls/new", (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   if (urlDatabase[req.params.shortURL] === undefined) {
-    res.render("urls_404.ejs"); //404 Undefined
+    const templateVars = {};
+    templateVars.error = "Invalid: Trying to acess a non existent link";
+    res.render("urls_404.ejs", templateVars);
   } else {
     const templateVars = {
       user: users[req.cookies["user_id"]],
