@@ -104,12 +104,11 @@ app.post("/urls/new", (req, res) => {
   if (req.body.longURL.length === 0) {
     res.render("urls_404.ejs"); //404 Undefined
   } else {
-    //edit database
     urlDatabase[generateRandomString()] = {
       longURL: req.body.longURL,
       userID: users[req.cookies["user_id"]],
     };
-    //edit database
+
     const templateVars = {
       user: users[req.cookies["user_id"]],
       user_id: req.cookies["user_id"],
@@ -127,9 +126,7 @@ app.get("/urls/:shortURL", (req, res) => {
       user: users[req.cookies["user_id"]],
       user_id: req.cookies["user_id"],
       shortURL: req.params.shortURL,
-      //edit database
       longURL: urlDatabase[req.params.shortURL]["longURL"],
-      //edit database
     };
     res.render("urls_show", templateVars);
   }
@@ -138,12 +135,12 @@ app.get("/urls/:shortURL", (req, res) => {
 app.post("/urls/:id", (req, res) => {
   //this is POST "/urls/:shortURL"
   delete urlDatabase[req.params.id];
-  //edit database
+
   urlDatabase[req.params.id] = {
     longURL: req.body.newLongURL,
     userID: users[req.cookies["user_id"]],
   };
-  //edit database
+
   res.redirect("/urls");
 });
 
@@ -153,7 +150,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  res.redirect(`/urls/${[req.params.shortURL]}`);
+  res.redirect(urlDatabase[req.params.shortURL]["longURL"]);
 });
 
 app.listen(PORT, () => {
