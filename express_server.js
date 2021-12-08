@@ -19,7 +19,7 @@ app.get("/", (req, res) => {
 
 app.get("/register", (req, res) => {
   const templateVars = {
-    username: req.cookies["username"],
+    user_id: req.cookies["user_id"],
   };
   res.render("urls_login", templateVars);
 });
@@ -34,42 +34,45 @@ app.post("/register", (req, res) => {
     email: email,
     password: password,
   };
-
+  res.cookie("user_id", users[id].id);
   res.redirect("/urls");
 });
 
 app.post("/login", (req, res) => {
-  res.cookie("username", req.body.username);
+  res.cookie("user_id", req.body.username);
   res.redirect("/urls");
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie("username");
+  res.clearCookie("user_id");
   res.redirect("/urls");
 });
 
 app.get("/urls", (req, res) => {
   const templateVars = {
-    username: req.cookies["username"],
     urls: urlDatabase,
+    user: users[req.cookies["user_id"]],
+    user_id: req.cookies["user_id"],
   };
   res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
   const templateVars = {
-    username: req.cookies["username"],
+    user: users[req.cookies["user_id"]],
+    user_id: req.cookies["user_id"],
   };
   res.render("urls_new", templateVars);
 });
 
-app.post("/urls", (req, res) => {
+app.post("/urls/new", (req, res) => {
   if (req.body.longURL.length === 0) {
     res.render("urls_404.ejs"); //404 Undefined
   } else {
     urlDatabase[generateRandomString()] = req.body.longURL;
     const templateVars = {
-      username: req.cookies["username"],
+      user: users[req.cookies["user_id"]],
+      user_id: req.cookies["user_id"],
       urls: urlDatabase,
     };
     res.render("urls_index", templateVars);
@@ -78,9 +81,10 @@ app.post("/urls", (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = {
-    username: req.cookies["username"],
-    shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL],
+   user: users[req.cookies["user_id"]],
+   user_id: req.cookies["user_id"],
+   shortURL: req.params.shortURL,
+  longURL: urlDatabase[req.params.shortURL],
   };
   if (urlDatabase[req.params.shortURL] === undefined) {
     res.render("urls_404.ejs"); //404 Undefined
@@ -89,7 +93,7 @@ app.get("/urls/:shortURL", (req, res) => {
   }
 });
 
-app.post("/urls/:id", (req, res) => {
+app.post("/urls/:id", (req, res) => { //this is POST "/urls/:shortURL"
   delete urlDatabase[req.params.id];
   urlDatabase[req.params.id] = req.body.newLongURL;
   res.redirect("/urls");
