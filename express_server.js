@@ -19,6 +19,7 @@ app.get("/", (req, res) => {
 
 app.get("/register", (req, res) => {
   const templateVars = {
+    user: users[req.cookies["user_id"]],
     user_id: req.cookies["user_id"],
   };
   res.render("urls_login", templateVars);
@@ -29,13 +30,24 @@ app.post("/register", (req, res) => {
   let email = req.body.email;
   let password = req.body.password;
 
-  users[id] = {
-    id: id,
-    email: email,
-    password: password,
-  };
-  res.cookie("user_id", users[id].id);
-  res.redirect("/urls");
+  if (id.length === 0 || email.length === 0) {
+    res.statusCode = 400;
+    res.render("urls_404.ejs");
+  }
+
+  if (emailFinder(users, email)) {
+    res.statusCode = 400;
+    res.render("urls_404.ejs");
+  } else {
+    users[id] = {
+      id: id,
+      email: email,
+      password: password,
+    };
+
+    res.cookie("user_id", users[id].id);
+    res.redirect("/urls");
+  }
 });
 
 app.post("/login", (req, res) => {
@@ -81,10 +93,10 @@ app.post("/urls/new", (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = {
-   user: users[req.cookies["user_id"]],
-   user_id: req.cookies["user_id"],
-   shortURL: req.params.shortURL,
-  longURL: urlDatabase[req.params.shortURL],
+    user: users[req.cookies["user_id"]],
+    user_id: req.cookies["user_id"],
+    shortURL: req.params.shortURL,
+    longURL: urlDatabase[req.params.shortURL],
   };
   if (urlDatabase[req.params.shortURL] === undefined) {
     res.render("urls_404.ejs"); //404 Undefined
@@ -93,7 +105,8 @@ app.get("/urls/:shortURL", (req, res) => {
   }
 });
 
-app.post("/urls/:id", (req, res) => { //this is POST "/urls/:shortURL"
+app.post("/urls/:id", (req, res) => {
+  //this is POST "/urls/:shortURL"
   delete urlDatabase[req.params.id];
   urlDatabase[req.params.id] = req.body.newLongURL;
   res.redirect("/urls");
@@ -123,4 +136,13 @@ function generateRandomString() {
     str += chx.charAt(Math.floor(Math.random() * chx.length));
   }
   return str;
+}
+
+function emailFinder(users, newUserEmail) {
+  for (let user in users) {
+    if (users[user]["email"] === newUserEmail) {
+      return true;
+    }
+  }
+  return false;
 }
