@@ -22,7 +22,7 @@ app.get("/register", (req, res) => {
     user: users[req.cookies["user_id"]],
     user_id: req.cookies["user_id"],
   };
-  res.render("urls_login", templateVars);
+  res.render("urls_register", templateVars);
 });
 
 app.post("/register", (req, res) => {
@@ -31,14 +31,15 @@ app.post("/register", (req, res) => {
   let password = req.body.password;
 
   if (id.length === 0 || email.length === 0) {
+    //This checks if the input is empty
     res.statusCode = 400;
     res.render("urls_404.ejs");
-  }
-
-  if (emailFinder(users, email)) {
+  } else if (emailFinder(users, email)) {
+    //This checks if there is duplicate email
     res.statusCode = 400;
     res.render("urls_404.ejs");
   } else {
+    //if everything is okay this here will create an object
     users[id] = {
       id: id,
       email: email,
@@ -50,14 +51,32 @@ app.post("/register", (req, res) => {
   }
 });
 
+app.get("/login", (req, res) => {
+  const templateVars = {
+    user: users[req.cookies["user_id"]],
+    user_id: req.cookies["user_id"],
+  };
+  res.render("urls_login", templateVars);
+});
+
 app.post("/login", (req, res) => {
-  res.cookie("user_id", req.body.username);
-  res.redirect("/urls");
+  let email = req.body.email;
+  let password = req.body.password;
+
+  let myUser = passwordFinder(users, email, password);
+
+  if (myUser) {
+    res.cookie("user_id", myUser["id"]);
+    res.redirect("/urls");
+  } else {
+    res.statusCode = 403;
+    res.render("urls_404");
+  }
 });
 
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id");
-  res.redirect("/urls");
+  res.redirect("/login");
 });
 
 app.get("/urls", (req, res) => {
@@ -145,4 +164,14 @@ function emailFinder(users, newUserEmail) {
     }
   }
   return false;
+}
+
+function passwordFinder(users, email, password) {
+  for (let user in users) {
+    if (users[user]["email"] === email) {
+      if (users[user]["password"] === password) {
+        return users[user];
+      }
+    }
+  }
 }
