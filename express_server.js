@@ -11,8 +11,30 @@ const cookieParser = require("cookie-parser");
 app.use(cookieParser());
 
 const urlDatabase = {};
+const users = {};
 
 app.get("/", (req, res) => {
+  res.redirect("/register");
+});
+
+app.get("/register", (req, res) => {
+  const templateVars = {
+    username: req.cookies["username"],
+  };
+  res.render("urls_login", templateVars);
+});
+
+app.post("/register", (req, res) => {
+  let id = generateRandomString();
+  let email = req.body.email;
+  let password = req.body.password;
+
+  users[id] = {
+    id: id,
+    email: email,
+    password: password,
+  };
+
   res.redirect("/urls");
 });
 
@@ -42,9 +64,8 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  
   if (req.body.longURL.length === 0) {
-    res.render("urls_404.ejs");//404 Undefined
+    res.render("urls_404.ejs"); //404 Undefined
   } else {
     urlDatabase[generateRandomString()] = req.body.longURL;
     const templateVars = {
@@ -61,10 +82,11 @@ app.get("/urls/:shortURL", (req, res) => {
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL],
   };
-  if(urlDatabase[req.params.shortURL] === undefined){
-    res.render("urls_404.ejs");//404 Undefined
-  }else{res.render("urls_show", templateVars);}
-  
+  if (urlDatabase[req.params.shortURL] === undefined) {
+    res.render("urls_404.ejs"); //404 Undefined
+  } else {
+    res.render("urls_show", templateVars);
+  }
 });
 
 app.post("/urls/:id", (req, res) => {
