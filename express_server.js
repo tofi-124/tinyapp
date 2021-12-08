@@ -26,8 +26,9 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
+  
   if (req.body.longURL.length === 0) {
-    res.render("urls_404.ejs");
+    res.render("urls_404.ejs");//404 Undefined
   } else {
     urlDatabase[generateRandomString()] = req.body.longURL;
     const templateVars = { urls: urlDatabase };
@@ -40,7 +41,10 @@ app.get("/urls/:shortURL", (req, res) => {
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL],
   };
-  res.render("urls_show", templateVars);
+  if(urlDatabase[req.params.shortURL] === undefined){
+    res.render("urls_404.ejs");//404 Undefined
+  }else{res.render("urls_show", templateVars);}
+  
 });
 
 app.post("/urls/:id", (req, res) => {
