@@ -10,11 +10,11 @@ app.use(bodyParser.urlencoded({ extended: true }));
 const cookieParser = require("cookie-parser");
 app.use(cookieParser());
 
-const urlDatabase = {};
 const users = {};
+const urlDatabase = {};
 
 app.get("/", (req, res) => {
-  res.redirect("/urls");
+  res.render("urls_landingpage.ejs");
 });
 
 app.get("/register", (req, res) => {
@@ -92,7 +92,12 @@ app.get("/urls", (req, res) => {
       user_id: req.cookies["user_id"],
     };
     res.render("urls_index", templateVars);
-  } else res.render("urls_landingpage.ejs");
+  } else {
+    const templateVars = {
+      error: 'Please register or login to create tinyUrls'
+    }
+    res.render("urls_404.ejs", templateVars);
+  }
 });
 
 app.get("/urls/new", (req, res) => {
@@ -102,7 +107,12 @@ app.get("/urls/new", (req, res) => {
       user_id: req.cookies["user_id"],
     };
     res.render("urls_new", templateVars);
-  } else res.render("urls_landingpage.ejs");
+  } else {
+    const templateVars = {
+      error: 'Please register or login to create tinyUrls'
+    }
+    res.render("urls_404.ejs", templateVars);
+  }
 });
 
 app.post("/urls/new", (req, res) => {
