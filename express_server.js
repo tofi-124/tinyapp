@@ -1,5 +1,7 @@
 const PORT = 8080;
 
+const { getUserByEmail, generateRandomString, passwordFinder } = require("./helpers");
+
 const bcrypt = require("bcryptjs");
 
 const express = require("express");
@@ -9,11 +11,13 @@ app.set("view engine", "ejs");
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({ extended: true }));
 
-var cookieSession = require('cookie-session')
-app.use(cookieSession({
-  name: 'session',
-  keys: ['key'],
-}))
+var cookieSession = require("cookie-session");
+app.use(
+  cookieSession({
+    name: "session",
+    keys: ["key"],
+  })
+);
 
 const users = {};
 const urlDatabase = {};
@@ -44,7 +48,7 @@ app.post("/register", (req, res) => {
     templateVars.error = "Id or Email is empty";
     res.statusCode = 400;
     res.render("urls_404.ejs", templateVars);
-  } else if (emailFinder(users, email)) {
+  } else if (getUserByEmail(email, users)) {
     //This checks if there is duplicate email
     templateVars.error = "Email already exists!";
     res.statusCode = 400;
@@ -87,7 +91,7 @@ app.post("/login", (req, res) => {
 });
 
 app.post("/logout", (req, res) => {
-  req.session = null
+  req.session = null;
   res.redirect("/login");
 });
 
@@ -199,34 +203,6 @@ app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
-//Helper Funcitons
-function generateRandomString() {
-  let chx = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrtsuvwxyz01234567890";
-  let str = "";
-  for (let i = 0; i < 6; i++) {
-    str += chx.charAt(Math.floor(Math.random() * chx.length));
-  }
-  return str;
-}
-
-function emailFinder(users, newUserEmail) {
-  for (let user in users) {
-    if (users[user]["email"] === newUserEmail) {
-      return true;
-    }
-  }
-  return false;
-}
-
-function passwordFinder(users, email, password) {
-  for (let user in users) {
-    if (users[user]["email"] === email) {
-      if (bcrypt.compareSync(password, users[user]["password"])) {
-        return users[user];
-      }
-    }
-  }
-}
 
 function urlsForUser(id) {
   let myNewurl = {};
@@ -240,4 +216,4 @@ function urlsForUser(id) {
   }
   return myNewurl;
 }
-//Helper Funcitons
+
