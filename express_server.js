@@ -84,8 +84,9 @@ app.post("/logout", (req, res) => {
 
 app.get("/urls", (req, res) => {
   if (req.cookies["user_id"]) {
+    let userUrl = urlsForUser(req.cookies["user_id"]);
     const templateVars = {
-      urls: urlDatabase,
+      urls: userUrl,
       user: users[req.cookies["user_id"]],
       user_id: req.cookies["user_id"],
     };
@@ -111,13 +112,14 @@ app.post("/urls/new", (req, res) => {
   } else {
     urlDatabase[generateRandomString()] = {
       longURL: req.body.longURL,
-      userID: users[req.cookies["user_id"]],
+      userID: req.cookies["user_id"],
     };
-
+    
+    let userUrl = urlsForUser(req.cookies["user_id"]);
     const templateVars = {
       user: users[req.cookies["user_id"]],
       user_id: req.cookies["user_id"],
-      urls: urlDatabase,
+      urls: userUrl,
     };
     res.render("urls_index", templateVars);
   }
@@ -194,4 +196,17 @@ function passwordFinder(users, email, password) {
       }
     }
   }
+}
+
+function urlsForUser(id) {
+  let myNewurl = {};
+  for (let urls in urlDatabase) {
+    if (urlDatabase[urls]["userID"] === id) {
+      myNewurl[urls] = {
+      longURL:  urlDatabase[urls]['longURL'],
+      userID: urlDatabase[urls]["userID"]
+      }
+    }
+  }
+  return myNewurl;
 }
