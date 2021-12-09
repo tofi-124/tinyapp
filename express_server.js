@@ -1,5 +1,7 @@
 const PORT = 8080;
 
+const bcrypt = require("bcryptjs");
+
 const express = require("express");
 const app = express();
 app.set("view engine", "ejs");
@@ -14,7 +16,9 @@ const users = {};
 const urlDatabase = {};
 
 app.get("/", (req, res) => {
-  res.render("urls_landingpage.ejs");
+  if (req.cookies["user_id"]) {
+    res.redirect("/urls");
+  } else res.render("urls_landingpage.ejs");
 });
 
 app.get("/register", (req, res) => {
@@ -28,7 +32,8 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
   let id = generateRandomString();
   let email = req.body.email;
-  let password = req.body.password;
+  const password = req.body.password;
+  const hashedPassword = bcrypt.hashSync(password, 10);
   const templateVars = {};
 
   if (id.length === 0 || email.length === 0) {
@@ -46,7 +51,7 @@ app.post("/register", (req, res) => {
     users[id] = {
       id: id,
       email: email,
-      password: password,
+      password: hashedPassword,
     };
 
     res.cookie("user_id", users[id].id);
@@ -94,8 +99,8 @@ app.get("/urls", (req, res) => {
     res.render("urls_index", templateVars);
   } else {
     const templateVars = {
-      error: 'Please register or login to create tinyUrls'
-    }
+      error: "Please register or login to create tinyUrls",
+    };
     res.render("urls_404.ejs", templateVars);
   }
 });
@@ -109,8 +114,8 @@ app.get("/urls/new", (req, res) => {
     res.render("urls_new", templateVars);
   } else {
     const templateVars = {
-      error: 'Please register or login to create tinyUrls'
-    }
+      error: "Please register or login to create tinyUrls",
+    };
     res.render("urls_404.ejs", templateVars);
   }
 });
@@ -167,6 +172,13 @@ app.post("/urls/:id", (req, res) => {
   } else res.render("urls_landingpage.ejs");
 });
 
+app.get("/urls/:shortURL/delete", (req, res) => {
+  if (req.cookies["user_id"] === urlDatabase[req.params.shortURL]["userID"]) {
+    delete urlDatabase[req.params.shortURL];
+    res.redirect("/urls");
+  } else res.render("urls_landingpage.ejs");
+});
+
 app.post("/urls/:shortURL/delete", (req, res) => {
   if (req.cookies["user_id"] === urlDatabase[req.params.shortURL]["userID"]) {
     delete urlDatabase[req.params.shortURL];
@@ -208,7 +220,7 @@ function emailFinder(users, newUserEmail) {
 function passwordFinder(users, email, password) {
   for (let user in users) {
     if (users[user]["email"] === email) {
-      if (users[user]["password"] === password) {
+      if (bcrypt.compareSync(password, users[user]["password"])) {
         return users[user];
       }
     }
