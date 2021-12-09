@@ -1,3 +1,4 @@
+//NPMS and CONST vars - start
 const PORT = 8080;
 
 const { getUserByEmail, generateRandomString, passwordFinder } = require("./helpers");
@@ -6,6 +7,7 @@ const bcrypt = require("bcryptjs");
 
 const express = require("express");
 const app = express();
+
 app.set("view engine", "ejs");
 
 const bodyParser = require("body-parser");
@@ -21,7 +23,9 @@ app.use(
 
 const users = {};
 const urlDatabase = {};
+//NPMS and CONST vars - end
 
+//All our gets and posts - start
 app.get("/", (req, res) => {
   if (req.session.user_id) {
     res.redirect("/urls");
@@ -45,7 +49,7 @@ app.post("/register", (req, res) => {
 
   if (id.length === 0 || email.length === 0) {
     //This checks if the input is empty
-    templateVars.error = "Id or Email is empty";
+    templateVars.error = "Email or Password empty!";
     res.statusCode = 400;
     res.render("urls_404.ejs", templateVars);
   } else if (getUserByEmail(email, users)) {
@@ -202,8 +206,9 @@ app.listen(PORT, () => {
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
+//All our gets and posts - end
 
-
+//Helper - start
 function urlsForUser(id) {
   let myNewurl = {};
   for (let urls in urlDatabase) {
@@ -216,3 +221,4 @@ function urlsForUser(id) {
   }
   return myNewurl;
 }
+//Helper - end
