@@ -1,7 +1,11 @@
 //NPMS and CONST vars - start
 const PORT = 8080;
 
-const { getUserByEmail, generateRandomString, passwordFinder } = require("./helpers");
+const {
+  getUserByEmail,
+  generateRandomString,
+  passwordFinder,
+} = require("./helpers");
 
 const bcrypt = require("bcryptjs");
 
@@ -33,14 +37,19 @@ app.get("/", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
+  if (req.session.user_id)res.redirect("/urls");
+  else{
   const templateVars = {
     user: users[req.session.user_id],
     user_id: req.session.user_id,
   };
   res.render("urls_register", templateVars);
+}
 });
 
 app.post("/register", (req, res) => {
+  if (req.session.user_id)res.redirect("/urls");
+  else{
   let id = generateRandomString();
   let email = req.body.email;
   const password = req.body.password;
@@ -67,18 +76,22 @@ app.post("/register", (req, res) => {
 
     req.session.user_id = users[id].id;
     res.redirect("/urls");
-  }
+  }}
 });
 
 app.get("/login", (req, res) => {
+  if (req.session.user_id)res.redirect("/urls");
+  else{
   const templateVars = {
     user: users[req.session.user_id],
     user_id: req.session.user_id,
   };
-  res.render("urls_login", templateVars);
+  res.render("urls_login", templateVars);}
 });
 
 app.post("/login", (req, res) => {
+  if (req.session.user_id)res.redirect("/urls");
+  else{
   const templateVars = {};
   let email = req.body.email;
   let password = req.body.password;
@@ -91,7 +104,7 @@ app.post("/login", (req, res) => {
     res.statusCode = 403;
     templateVars.error = "Invalid Email or Password";
     res.render("urls_404", templateVars);
-  }
+  }}
 });
 
 app.post("/logout", (req, res) => {
@@ -107,6 +120,7 @@ app.get("/urls", (req, res) => {
       user: users[req.session.user_id],
       user_id: req.session.user_id,
     };
+
     res.render("urls_index", templateVars);
   } else {
     const templateVars = {
