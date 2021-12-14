@@ -37,74 +37,77 @@ app.get("/", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
-  if (req.session.user_id)res.redirect("/urls");
-  else{
-  const templateVars = {
-    user: users[req.session.user_id],
-    user_id: req.session.user_id,
-  };
-  res.render("urls_register", templateVars);
-}
+  if (req.session.user_id) res.redirect("/urls");
+  else {
+    const templateVars = {
+      user: users[req.session.user_id],
+      user_id: req.session.user_id,
+    };
+    res.render("urls_register", templateVars);
+  }
 });
 
 app.post("/register", (req, res) => {
-  if (req.session.user_id)res.redirect("/urls");
-  else{
-  let id = generateRandomString();
-  let email = req.body.email;
-  const password = req.body.password;
-  const hashedPassword = bcrypt.hashSync(password, 10);
-  const templateVars = {};
+  if (req.session.user_id) res.redirect("/urls");
+  else {
+    let id = generateRandomString();
+    let email = req.body.email;
+    const password = req.body.password;
+    const hashedPassword = bcrypt.hashSync(password, 10);
+    const templateVars = {};
 
-  if (id.length === 0 || email.length === 0) {
-    //This checks if the input is empty
-    templateVars.error = "Email or Password empty!";
-    res.statusCode = 400;
-    res.render("urls_404.ejs", templateVars);
-  } else if (getUserByEmail(email, users)) {
-    //This checks if there is duplicate email
-    templateVars.error = "Email already exists!";
-    res.statusCode = 400;
-    res.render("urls_404.ejs", templateVars);
-  } else {
-    //if everything is okay this here will create an object
-    users[id] = {
-      id: id,
-      email: email,
-      password: hashedPassword,
-    };
+    if (id.length === 0 || email.length === 0) {
+      //This checks if the input is empty
+      templateVars.error = "Email or Password empty!";
+      res.statusCode = 400;
+      res.render("urls_404.ejs", templateVars);
+    } else if (getUserByEmail(email, users)) {
+      //This checks if there is duplicate email
+      templateVars.error = "Email already exists!";
+      res.statusCode = 400;
+      res.render("urls_404.ejs", templateVars);
+    } else {
+      //if everything is okay this here will create an object
+      users[id] = {
+        id: id,
+        email: email,
+        password: hashedPassword,
+      };
 
-    req.session.user_id = users[id].id;
-    res.redirect("/urls");
-  }}
+      req.session.user_id = users[id].id;
+      res.redirect("/urls");
+    }
+  }
 });
 
 app.get("/login", (req, res) => {
-  if (req.session.user_id)res.redirect("/urls");
-  else{
-  const templateVars = {
-    user: users[req.session.user_id],
-    user_id: req.session.user_id,
-  };
-  res.render("urls_login", templateVars);}
+  if (req.session.user_id) res.redirect("/urls");
+  else {
+    const templateVars = {
+      user: users[req.session.user_id],
+      user_id: req.session.user_id,
+    };
+    res.render("urls_login", templateVars);
+  }
 });
 
 app.post("/login", (req, res) => {
-  if (req.session.user_id)res.redirect("/urls");
-  else{
-  const templateVars = {};
-  let email = req.body.email;
-  let password = req.body.password;
-  let myUser = passwordFinder(users, email, password);
+  if (req.session.user_id) res.redirect("/urls");
+  else {
+    const templateVars = {};
+    let email = req.body.email;
+    let password = req.body.password;
+    let myUser = passwordFinder(users, email, password);
 
-  if (myUser) {
-    req.session.user_id = myUser["id"];
-    res.redirect("/urls");
-  } else {
-    res.statusCode = 403;
-    templateVars.error = "Invalid Email or Password";
-    res.render("urls_404", templateVars);
-  }}
+    if (myUser) {
+      req.session.user_id = myUser["id"];
+      res.redirect("/urls");
+    } else {
+      res.statusCode = 403;
+      templateVars.error = "Invalid Email or Password";
+      res.render("urls_404", templateVars);
+    }
+  }
 });
 
 app.post("/logout", (req, res) => {
@@ -220,6 +223,7 @@ app.listen(PORT, () => {
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
+
 //All our gets and posts - end
 
 //Helper - start
@@ -236,4 +240,4 @@ function urlsForUser(id) {
   return myNewurl;
 }
 //Helper - end
-//hello
+
