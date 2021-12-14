@@ -240,15 +240,4 @@ function urlsForUser(id) {
   return myNewurl;
 }
 //Helper - end
-function urlsForUser(id) {
-  let myNewurl = {};
-  for (let urls in urlDatabase) {
-    if (urlDatabase[urls]["userID"] === id) {
-      myNewurl[urls] = {
-        longURL: urlDatabase[urls]["longURL"],
-        userID: urlDatabase[urls]["userID"],
-      };
-    }
-  }
-  return myNewurl;
-}
+
